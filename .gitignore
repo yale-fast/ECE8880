@@ -8,3 +8,9 @@ lab2/*.xo
 lab3/work.out
 lab3/*.o
 lab3/*.xo
+lab3/cnn
+
+lab3/part2/work.out
+lab3/part2/*.o
+lab3/part2/*.xo
+lab3/part2/cnn

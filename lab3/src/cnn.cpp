@@ -141,6 +141,22 @@ void cnncore(
   const int kOutImSize) {
   static float C[kNum_0][kImSize_0][kImSize_0];
 
+  // better notation
+  const int N = kNum_0;
+  const int M = kNum_0;
+  const int K = kKernel_0;
+  const int R = kImSize_0;
+  const int C = kImSize_0;
+
+  const int T_r = 1;
+  const int T_C = 1;
+  const int T_m = 64;
+  const int T_n = 8;
+
+  for (int r = 0; r < R; r += T_r) {
+    for ()
+  }
+
   for (int i = 0; i < kNum; ++i) {
   #pragma HLS loop_tripcount min=1 max=kNum_0
     for (int h = 0; h < kImSize; ++h) {
@@ -154,7 +170,7 @@ void cnncore(
   }
 
   // Convolution
-  for (int i = 0; i < kNum; ++i) { // kNum kernels
+  for (int i = 0; i < kNum; ++i) { // each output map
   #pragma HLS loop_tripcount min=1 max=kNum_0
     for (int j = 0; j < kNum; ++j) { // each kernel kNum channels
     #pragma HLS loop_tripcount min=1 max=kNum_0
