@@ -18,23 +18,19 @@ DEFINE_string(btstm, "", "path to the bitstream file, run csim if empty");
 
 // Dot product of the input vector with itself on host for result verification
 void DotProduct_host(
-    aligned_vector<float_v16> & input_v,
+    aligned_vector<float> & input_v,
     aligned_vector<float> & output_sum) {
     float sum = 0.0f;
-    for (int i = 0; i < kNumVecs; i++) {
-        for (int j = 0; j < kVecWidth; j++) {
-            sum += input_v[i][j] * input_v[i][j];
-        }
+    for (int i = 0; i < kVectorLen; i++) {
+        sum += input_v[i] * input_v[i];
     }
     output_sum[0] = sum;
 }
 
 void InitializeData(
-    aligned_vector<float_v16> & input_v) {
-    for (int i = 0; i < kNumVecs; i++) {
-        for (int j = 0; j < kVecWidth; j++) {
-            input_v[i][j] = 1.0 * ((i * kVecWidth + j) % 64) / 64;
-        }
+    aligned_vector<float> & input_v) {
+    for (int i = 0; i < kVectorLen; i++) {
+        input_v[i] = 1.0f * (i % 64) / 64;
     }
 }
 
@@ -56,7 +52,7 @@ int Verify(aligned_vector<float> & output_device,
 int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, /*remove_flags=*/true);
   //host data
-  aligned_vector<float_v16> v(kNumVecs);
+  aligned_vector<float> v(kVectorLen);
   aligned_vector<float> sum_dev(1, 0.0);
   aligned_vector<float> sum_host(1, 0.0);
   aligned_vector<uint32_t> cycle_count(1, 0);
@@ -65,9 +61,9 @@ int main(int argc, char** argv) {
 
   DotProduct_host(v, sum_host);
 
-  //invoke kernel
+  // View the same float storage as packed words only at the kernel boundary.
   tapa::invoke(DotProductKernel, FLAGS_btstm,
-                 tapa::read_only_mmap<float_v16>(v),
+                 tapa::read_only_mmap<float>(v).reinterpret<float_v16>(),
                  tapa::write_only_mmap<float>(sum_dev),
                  tapa::write_only_mmap<uint32_t>(cycle_count));
 
