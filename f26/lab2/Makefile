@@ -20,7 +20,7 @@ TRAIN_IMAGE_NUM ?= 256
 TEST_IMAGE_NUM ?= 128
 endif
 DEFINES := -DTRAIN_IMAGE_NUM=$(TRAIN_IMAGE_NUM) -DTEST_IMAGE_NUM=$(TEST_IMAGE_NUM)
-GXX_FLAGS := -w -O2 -std=c++17 $(DEFINES)
+GXX_FLAGS := -w -O2 -std=c++17 -I$(XILINX_VITIS)/include $(DEFINES)
 # Use eight TAPA task workers during software simulation.
 export TAPA_CONCURRENCY := 8
 LIB := -ltapa -lfrt -lglog -lgflags -lOpenCL

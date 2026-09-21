@@ -7,8 +7,8 @@
 // Stream reads consume data; mismatched read/write counts can stall simulation.
 // Use .read() and .write() for stream access throughout the missing code.
 
-void ReadImage(tapa::mmap<uint32_t> input_v,
-               tapa::ostream<uint32_t>& output_stream) {
+void ReadImage(tapa::mmap<memory_type> input_v,
+               tapa::ostream<memory_type>& output_stream) {
   for (int repeat = 0; repeat < kTestImages; ++repeat) {
     for (int i = 0; i < kTrainImagesPerClass * kImageWords; ++i) {
 #pragma HLS PIPELINE II=1
@@ -18,20 +18,20 @@ void ReadImage(tapa::mmap<uint32_t> input_v,
 }
 
 // Read test images from memory and broadcast it to all ten KnnDist modules.
-void ReadTestImages(tapa::mmap<uint32_t> test_image,
-                    tapa::ostream<uint32_t>& test_stream_0,
-                    tapa::ostream<uint32_t>& test_stream_1,
-                    tapa::ostream<uint32_t>& test_stream_2,
-                    tapa::ostream<uint32_t>& test_stream_3,
-                    tapa::ostream<uint32_t>& test_stream_4,
-                    tapa::ostream<uint32_t>& test_stream_5,
-                    tapa::ostream<uint32_t>& test_stream_6,
-                    tapa::ostream<uint32_t>& test_stream_7,
-                    tapa::ostream<uint32_t>& test_stream_8,
-                    tapa::ostream<uint32_t>& test_stream_9) {
+void ReadTestImages(tapa::mmap<memory_type> test_image,
+                    tapa::ostream<memory_type>& test_stream_0,
+                    tapa::ostream<memory_type>& test_stream_1,
+                    tapa::ostream<memory_type>& test_stream_2,
+                    tapa::ostream<memory_type>& test_stream_3,
+                    tapa::ostream<memory_type>& test_stream_4,
+                    tapa::ostream<memory_type>& test_stream_5,
+                    tapa::ostream<memory_type>& test_stream_6,
+                    tapa::ostream<memory_type>& test_stream_7,
+                    tapa::ostream<memory_type>& test_stream_8,
+                    tapa::ostream<memory_type>& test_stream_9) {
   for (int i = 0; i < kTestImages * kImageWords; ++i) {
 #pragma HLS PIPELINE II=1
-    const uint32_t word = test_image[i];
+    const memory_type word = test_image[i];
     test_stream_0.write(word);
     test_stream_1.write(word);
     test_stream_2.write(word);
@@ -46,7 +46,8 @@ void ReadTestImages(tapa::mmap<uint32_t> test_image,
 }
 
 // One instance computes distances for all training images of one class.
-// TODO: Complete the input types
+// TODO: Complete the input types; each word carries kBytesPerWord image bytes
+// (see memory_type in knn.h).
 void KnnDist(tapa::istream<...>& train_stream,
              tapa::istream<...>& test_stream,
              tapa::ostream<uint32_t>& distance_stream) {
@@ -109,18 +110,18 @@ void Timer(tapa::istream<bool>& done_stream,
   cycle_count[0] = count;
 }
 
-// TODO: Keep these image-port types identical to the declaration in knn.h.
-void KNNKernel(tapa::mmap<...> train_image_0,
-               tapa::mmap<...> train_image_1,
-               tapa::mmap<...> train_image_2,
-               tapa::mmap<...> train_image_3,
-               tapa::mmap<...> train_image_4,
-               tapa::mmap<...> train_image_5,
-               tapa::mmap<...> train_image_6,
-               tapa::mmap<...> train_image_7,
-               tapa::mmap<...> train_image_8,
-               tapa::mmap<...> train_image_9,
-               tapa::mmap<...> test_image,
+// The image ports use memory_type, matching the declaration in knn.h.
+void KNNKernel(tapa::mmap<memory_type> train_image_0,
+               tapa::mmap<memory_type> train_image_1,
+               tapa::mmap<memory_type> train_image_2,
+               tapa::mmap<memory_type> train_image_3,
+               tapa::mmap<memory_type> train_image_4,
+               tapa::mmap<memory_type> train_image_5,
+               tapa::mmap<memory_type> train_image_6,
+               tapa::mmap<memory_type> train_image_7,
+               tapa::mmap<memory_type> train_image_8,
+               tapa::mmap<memory_type> train_image_9,
+               tapa::mmap<memory_type> test_image,
                tapa::mmap<uint32_t> predict_label,
                tapa::mmap<uint32_t> cycle_count) {
   // Each suffix identifies one class. Every FIFO has kStreamDepth entries.

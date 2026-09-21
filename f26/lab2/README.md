@@ -39,10 +39,20 @@ original CIFAR-10 batch files, which include a label byte in each record.
 
 The CPU reference processes individual bytes and classifies test images
 sequentially. The Makefile sets `TAPA_CONCURRENCY=8`
-for the software-simulation task workers. The supplied kernel readers access
-the same storage as 768 packed words per image; use the shared layout when
-completing the missing interface types and distance computation.
+for the software-simulation task workers. The kernel accesses the same storage
+as packed words of `memory_type`, `kImageWords` words per image; use the shared
+layout when completing the missing interface types and distance computation.
 The shared layout constants are in [src/knn.h](src/knn.h).
+
+Set `memory_type` in [src/knn.h](src/knn.h) to the word type of your train/test
+image memory interface. The default `uint32_t` moves 4 bytes per access
+(768 words per image); a wider type such as `ap_uint<512>` moves 64 bytes per
+access (48 words per image) and reduces the number of memory accesses.
+`kImageWords` follows from `memory_type` automatically, and the host
+`reinterpret<...>()` calls in [src/main.cpp](src/main.cpp) must use the same
+type. With a 512-bit `memory_type`, declare `memory_type` as `ap_uint<512>`,
+uncomment the `#include <ap_int.h>` line in [src/knn.h](src/knn.h), and
+reinterpret the host image buffers with `reinterpret<ap_uint<512>>()`.
 
 ## Kernel data flow
 
@@ -155,10 +165,10 @@ write or extra read can leave a task waiting indefinitely.
 
 ## Run and verify
 
-First, complete all `...` placeholders in `src/main.cpp`, `src/knn.h`, and
-`src/knn.cpp`, following the TODO comments. The starter code will not compile
-until these placeholders are replaced. Keep the provided CPU reference and
-verification code unchanged.
+First, set `memory_type` in `src/knn.h` and complete all `...` placeholders in
+`src/main.cpp` and `src/knn.cpp`, following the TODO comments. The starter code
+will not compile until these placeholders are replaced. Keep the provided CPU
+reference and verification code unchanged.
 
 Then, from the repository root, run the software simulation:
 

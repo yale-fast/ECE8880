@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     }
 
     // Empty btstm runs software simulation. Reinterpret the same image storage
-    // as an element type matching the corresponding kernel port.
+    // as memory_type (see src/knn.h), matching the corresponding kernel port.
     // TODO: Complete the input arguments in the exact order declared in knn.h.
     const int64_t kernel_time_ns = tapa::invoke(KNNKernel, FLAGS_btstm,
                  tapa::read_only_mmap<uint8_t>(train_image[0]).reinterpret<...>(),
